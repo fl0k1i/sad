@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>The Sadness Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1b1f3b;
+    --dusk:#232946;
+    --dusk-2:#2e335a;
+    --mist:#edf2fb;
+    --mist-dim:#c9d2ec;
+    --lavender:#8d99ae;
+    --amber:#f4a261;
+    --amber-deep:#c97a3c;
+    --coral:#ee6c4d;
+    --coral-deep:#b84a30;
+    --puddle:#4c6ef5;
+    --radius:20px;
+    --shadow: 0 18px 40px rgba(15,17,38,0.35);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 15% -10%, #3a4172 0%, transparent 55%),
+      radial-gradient(circle at 110% 10%, #38446e 0%, transparent 45%),
+      linear-gradient(180deg, var(--dusk) 0%, #1a1e38 100%);
+    font-family:'Space Grotesk', sans-serif;
+    color:var(--mist);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px 16px 60px;
+    overflow-x:hidden;
+  }
+
+  .rain{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    z-index:0;
+  }
+  .drop{
+    position:absolute;
+    top:-40px;
+    width:2px;
+    height:60px;
+    background:linear-gradient(180deg, transparent, rgba(140,160,220,0.35));
+    animation:fall linear infinite;
+  }
+  @keyframes fall{
+    to{ transform:translateY(120vh); }
+  }
+
+  .app{
+    position:relative;
+    z-index:1;
+    width:100%;
+    max-width:480px;
+  }
+
+  .card{
+    background:linear-gradient(180deg, var(--dusk-2), #262b52);
+    border:1px solid rgba(237,242,251,0.08);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:34px 26px 30px;
+    position:relative;
+    overflow:hidden;
+  }
+  .card::before{
+    content:"";
+    position:absolute;
+    top:-60px; right:-60px;
+    width:180px; height:180px;
+    background:radial-gradient(circle, rgba(244,162,97,0.18), transparent 70%);
+    pointer-events:none;
+  }
+
+  .eyebrow{
+    font-family:'Fredoka', sans-serif;
+    font-weight:600;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    font-size:12px;
+    color:var(--amber);
+    margin:0 0 10px;
+  }
+
+  h1{
+    font-family:'Fredoka', sans-serif;
+    font-weight:700;
+    font-size:34px;
+    line-height:1.08;
+    margin:0 0 14px;
+    color:var(--mist);
+  }
+  h1 span{ color:var(--coral); }
+
+  .lede{
+    font-size:15.5px;
+    line-height:1.6;
+    color:var(--mist-dim);
+    margin:0 0 28px;
+  }
+
+  .btn{
+    font-family:'Fredoka', sans-serif;
+    font-weight:600;
+    font-size:16px;
+    border:none;
+    border-radius:14px;
+    padding:15px 22px;
+    cursor:pointer;
+    width:100%;
+    text-align:left;
+    background:rgba(237,242,251,0.06);
+    color:var(--mist);
+    border:1px solid rgba(237,242,251,0.12);
+    transition:transform .15s ease, background .15s ease, border-color .15s ease;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .btn:hover{
+    background:rgba(237,242,251,0.11);
+    border-color:rgba(244,162,97,0.5);
+    transform:translateY(-1px);
+  }
+  .btn:active{ transform:translateY(0) scale(.98); }
+  .btn .num{
+    font-family:'Space Grotesk';
+    font-size:13px;
+    color:var(--dusk);
+    background:var(--mist-dim);
+    width:24px; height:24px;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+
+  .primary{
+    font-family:'Fredoka', sans-serif;
+    font-weight:700;
+    font-size:17px;
+    border:none;
+    border-radius:14px;
+    padding:16px 22px;
+    cursor:pointer;
+    width:100%;
+    background:linear-gradient(180deg, var(--coral), var(--coral-deep));
+    color:#fff8f4;
+    box-shadow:0 10px 24px rgba(238,108,77,0.35);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .primary:hover{ transform:translateY(-2px); box-shadow:0 14px 30px rgba(238,108,77,0.42); }
+  .primary:active{ transform:translateY(0) scale(.98); }
+
+  .ghost{
+    margin-top:12px;
+    background:transparent;
+    border:1px solid rgba(237,242,251,0.18);
+    color:var(--mist-dim);
+    font-family:'Space Grotesk';
+    font-size:14px;
+    border-radius:12px;
+    padding:12px;
+    width:100%;
+    cursor:pointer;
+  }
+  .ghost:hover{ border-color:rgba(237,242,251,0.4); color:var(--mist); }
+
+  /* progress */
+  .progress-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:18px;
+  }
+  .progress-label{
+    font-size:12.5px;
+    color:var(--mist-dim);
+    letter-spacing:.06em;
+    text-transform:uppercase;
+  }
+  .cloud-meter{
+    display:flex;
+    gap:6px;
+  }
+  .droplet{
+    width:9px; height:12px;
+    border-radius:50% 50% 50% 0;
+    transform:rotate(45deg);
+    background:rgba(237,242,251,0.14);
+    transition:background .3s ease, transform .3s ease;
+  }
+  .droplet.filled{
+    background:var(--puddle);
+  }
+
+  .q-count{
+    font-size:13px;
+    color:var(--amber);
+    font-family:'Fredoka';
+    font-weight:600;
+    margin:0 0 8px;
+  }
+  .q-text{
+    font-family:'Fredoka', sans-serif;
+    font-weight:600;
+    font-size:22px;
+    line-height:1.28;
+    margin:0 0 22px;
+    color:var(--mist);
+  }
+  .options{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  /* results */
+  .result-emoji{
+    font-size:104px;
+    line-height:1;
+    margin-bottom:6px;
+    display:block;
+    text-align:center;
+    filter:drop-shadow(0 12px 20px rgba(0,0,0,0.35));
+    animation:dropIn .6s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes dropIn{
+    0%{ transform:translateY(-40px) scale(.4); opacity:0; }
+    60%{ transform:translateY(4px) scale(1.08); opacity:1; }
+    100%{ transform:translateY(0) scale(1); }
+  }
+  .result-title{
+    font-family:'Fredoka', sans-serif;
+    font-weight:700;
+    font-size:28px;
+    margin:0 0 6px;
+    color:var(--mist);
+    text-align:center;
+  }
+  .result-score{
+    font-size:14px;
+    color:var(--amber);
+    font-family:'Fredoka';
+    font-weight:600;
+    margin:0 0 18px;
+    text-align:center;
+  }
+  .result-desc{
+    font-size:15px;
+    line-height:1.65;
+    color:var(--mist-dim);
+    margin:0 0 24px;
+  }
+
+  .puddle-wrap{
+    background:rgba(237,242,251,0.06);
+    border-radius:14px;
+    padding:16px 18px;
+    margin-bottom:24px;
+    border:1px solid rgba(237,242,251,0.1);
+  }
+  .puddle-label{
+    display:flex;
+    justify-content:space-between;
+    font-size:12px;
+    color:var(--mist-dim);
+    margin-bottom:8px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+  }
+  .puddle-track{
+    height:14px;
+    border-radius:8px;
+    background:rgba(237,242,251,0.08);
+    overflow:hidden;
+    position:relative;
+  }
+  .puddle-fill{
+    height:100%;
+    border-radius:8px;
+    background:linear-gradient(90deg, var(--amber), var(--coral), var(--puddle));
+    width:0%;
+    transition:width 1.1s cubic-bezier(.2,.9,.25,1);
+  }
+
+  .screen{ display:none; }
+  .screen.active{ display:block; animation:rise .4s ease; }
+  @keyframes rise{
+    from{ opacity:0; transform:translateY(10px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+
+  @media (max-width:400px){
+    h1{ font-size:28px; }
+    .q-text{ font-size:19px; }
+    .card{ padding:26px 18px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="rain" id="rain"></div>
+
+<div class="app">
+  <div class="card">
+
+    <div class="screen active" id="screen-start">
+      <p class="eyebrow">A highly scientific instrument</p>
+      <h1>How <span>soggy</span><br>is your soul today?</h1>
+      <p class="lede">8 questions. Zero therapists involved. Answer honestly (or don't, we're not the mood police) and find out your official sadness forecast.</p>
+      <button class="primary" onclick="startQuiz()">Start the quiz</button>
+    </div>
+
+    <div class="screen" id="screen-quiz">
+      <div class="progress-row">
+        <span class="progress-label" id="progress-label">Question 1 of 8</span>
+        <div class="cloud-meter" id="cloud-meter"></div>
+      </div>
+      <p class="q-count" id="q-count">Q1</p>
+      <p class="q-text" id="q-text"></p>
+      <div class="options" id="options"></div>
+    </div>
+
+    <div class="screen" id="screen-result">
+      <span class="result-emoji" id="result-emoji"></span>
+      <h1 class="result-title" id="result-title"></h1>
+      <p class="result-score" id="result-score"></p>
+      <p class="result-desc" id="result-desc"></p>
+
+      <div class="puddle-wrap">
+        <div class="puddle-label">
+          <span>sunshine</span>
+          <span>thunderstorm</span>
+        </div>
+        <div class="puddle-track">
+          <div class="puddle-fill" id="puddle-fill"></div>
+        </div>
+      </div>
+
+      <button class="primary" onclick="restartQuiz()">Take it again</button>
+      <button class="ghost" onclick="shareResult()" id="share-btn">Copy my results</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    text: "Your ice cream scoop launches itself off the cone in a full swan dive. Onto the pavement. In front of a toddler who watched the whole thing happen.",
+    options: [
+      { label: "RIP mint choc chip, we hardly knew ye", pts: 1 },
+      { label: "I stare at the crime scene for 10 solid seconds", pts: 2 },
+      { label: "I make eye contact with the toddler like 'yeah, this is grief'", pts: 3 },
+      { label: "I sit down on the curb next to it. We're roommates now.", pts: 4 }
+    ]
+  },
+  {
+    text: "Autocorrect changes 'I'm on my way' to 'I'm on my whale' during an otherwise very serious conversation, and nobody acknowledges it.",
+    options: [
+      { label: "Iconic. I'm keeping it. I am on my whale.", pts: 1 },
+      { label: "I send a follow-up text just to explain the whale", pts: 2 },
+      { label: "I think about the whale for the rest of the day", pts: 3 },
+      { label: "The whale becomes a core memory. I will die on my whale.", pts: 4 }
+    ]
+  },
+  {
+    text: "You confidently wave back at someone across the street, big smile, whole arm — turns out they were waving at literally anyone behind you.",
+    options: [
+      { label: "Smooth transition into fixing my hair, no one saw anything", pts: 1 },
+      { label: "I do a weird cough-wave hybrid to cover it up", pts: 2 },
+      { label: "I replay it on a loop for the rest of the walk", pts: 3 },
+      { label: "I need to move to a different town", pts: 4 }
+    ]
+  },
+  {
+    text: "It's raining, you forgot your umbrella, and your shoes are making a sound that can only be described as 'squelch: the sequel.'",
+    options: [
+      { label: "Puddle jumping time, main character energy activated", pts: 1 },
+      { label: "Mild inconvenience, mild sigh, mildly soggy socks", pts: 2 },
+      { label: "I narrate my own tragic backstory as I walk", pts: 3 },
+      { label: "I am the rain now. We are one. Do not speak to me.", pts: 4 }
+    ]
+  },
+  {
+    text: "Your favorite show gets cancelled after one perfect, flawless, understood-by-nobody season.",
+    options: [
+      { label: "On to the next binge, no funeral required", pts: 1 },
+      { label: "One (1) tear, then I move on with my life", pts: 2 },
+      { label: "I write an strongly worded, unsent letter to the network", pts: 3 },
+      { label: "I light a candle. There is a moment of silence. I mean it.", pts: 4 }
+    ]
+  },
+  {
+    text: "Spotify Wrapped reveals your most-played song of the year, and it is deeply, publicly embarrassing.",
+    options: [
+      { label: "I own it. Loudly. It slaps and everyone can know it", pts: 1 },
+      { label: "I quietly screenshot it and never open the app again", pts: 2 },
+      { label: "I consider deactivating all my accounts", pts: 3 },
+      { label: "I begin drafting my resignation from society", pts: 4 }
+    ]
+  },
+  {
+    text: "Your houseplant, whom you named and had a whole personality for, has died despite your best efforts and several pep talks.",
+    options: [
+      { label: "It's basically a salad now, RIP, I'll get another", pts: 1 },
+      { label: "A moment of silence, then I Google 'plants that are impossible to kill'", pts: 2 },
+      { label: "I hold a small, dignified funeral with a paper plate as the headstone", pts: 3 },
+      { label: "I haven't watered anything since. It's been weeks. The others are next.", pts: 4 }
+    ]
+  },
+  {
+    text: "You do the 'no, after you' — 'no no, after YOU' door dance with a total stranger for so long it becomes its own event with a beginning, middle, and end.",
+    options: [
+      { label: "I win. I go first. Dignity intact.", pts: 1 },
+      { label: "We both go at once and collide, mildly, forever", pts: 2 },
+      { label: "I replay the exact tone of my voice for hours", pts: 3 },
+      { label: "That stranger is now my arch-nemesis and I think about them daily", pts: 4 }
+    ]
+  }
+];
+
+const results = [
+  {
+    max: 13,
+    emoji: "🌤️",
+    title: "Sunshine with a light drizzle",
+    desc: "You shrug things off like a duck sheds water. A minor tragedy hits, you feel it for four seconds, and then you're back to whatever you were doing. Certified emotionally waterproof."
+  },
+  {
+    max: 19,
+    emoji: "⛅",
+    title: "Partly cloudy, chance of feels",
+    desc: "Mostly steady skies, with the occasional sentimental cloud drifting through. You let things land before moving on — which, honestly, is the emotionally mature move."
+  },
+  {
+    max: 25,
+    emoji: "🌧️",
+    title: "Overcast with emotional showers",
+    desc: "You feel things, and you feel them thoroughly. A dead plant is a whole event. A cancelled show requires processing time. Nothing wrong with that — bring a raincoat and a snack."
+  },
+  {
+    max: 32,
+    emoji: "⛈️",
+    title: "Full thunderstorm, send snacks",
+    desc: "You are a poet trapped in a person's body. Every small loss becomes a tiny opera. We respect the commitment to feeling things at full volume. Someone hand this person a blanket and a biscuit."
+  }
+];
+
+let current = 0;
+let score = 0;
+const answers = [];
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function buildCloudMeter(){
+  const meter = document.getElementById('cloud-meter');
+  meter.innerHTML = '';
+  for(let i = 0; i < questions.length; i++){
+    const d = document.createElement('div');
+    d.className = 'droplet';
+    meter.appendChild(d);
+  }
+}
+
+function updateCloudMeter(){
+  const drops = document.querySelectorAll('.droplet');
+  drops.forEach((d, i) => {
+    d.classList.toggle('filled', i < current);
+  });
+}
+
+function startQuiz(){
+  current = 0;
+  score = 0;
+  answers.length = 0;
+  buildCloudMeter();
+  showScreen('screen-quiz');
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const q = questions[current];
+  document.getElementById('progress-label').textContent = `Question ${current + 1} of ${questions.length}`;
+  document.getElementById('q-count').textContent = `Q${current + 1}`;
+  document.getElementById('q-text').textContent = q.text;
+  updateCloudMeter();
+
+  const optWrap = document.getElementById('options');
+  optWrap.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.innerHTML = `<span class="num">${String.fromCharCode(65 + i)}</span><span>${opt.label}</span>`;
+    btn.onclick = () => selectAnswer(opt.pts);
+    optWrap.appendChild(btn);
+  });
+}
+
+function selectAnswer(pts){
+  score += pts;
+  answers.push(pts);
+  current++;
+  if(current < questions.length){
+    renderQuestion();
+  } else {
+    showResult();
+  }
+}
+
+function showResult(){
+  const result = results.find(r => score <= r.max);
+  document.getElementById('result-emoji').textContent = result.emoji;
+  document.getElementById('result-title').textContent = result.title;
+  document.getElementById('result-score').textContent = `Sadness score: ${score} out of 32`;
+  document.getElementById('result-desc').textContent = result.desc;
+  showScreen('screen-result');
+
+  const pct = Math.round((score / 32) * 100);
+  const fill = document.getElementById('puddle-fill');
+  fill.style.width = '0%';
+  requestAnimationFrame(() => {
+    setTimeout(() => { fill.style.width = pct + '%'; }, 60);
+  });
+}
+
+function restartQuiz(){
+  startQuiz();
+}
+
+function shareResult(){
+  const result = results.find(r => score <= r.max);
+  const text = `I took the sadness quiz and got "${result.title}" ${result.emoji} — a sadness score of ${score} out of 32.`;
+  const btn = document.getElementById('share-btn');
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(text).then(() => {
+      const original = btn.textContent;
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = original, 1600);
+    }).catch(() => {});
+  }
+}
+
+// ambient rain
+(function initRain(){
+  const rainEl = document.getElementById('rain');
+  const count = window.innerWidth < 500 ? 18 : 30;
+  for(let i = 0; i < count; i++){
+    const d = document.createElement('div');
+    d.className = 'drop';
+    d.style.left = Math.random() * 100 + 'vw';
+    d.style.animationDuration = (2.5 + Math.random() * 2.5) + 's';
+    d.style.animationDelay = (Math.random() * 4) + 's';
+    d.style.opacity = 0.3 + Math.random() * 0.4;
+    rainEl.appendChild(d);
+  }
+})();
+</script>
+
+</body>
+</html>
